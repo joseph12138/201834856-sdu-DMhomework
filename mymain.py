@@ -1,14 +1,15 @@
 from stanfordcorenlp import StanfordCoreNLP 
 import os
-nlp = StanfordCoreNLP(r'D:\000-software\corenlp\stanford-corenlp-full-2018-10-05') 
+import math
+nlp = StanfordCoreNLP(r'D:\000-software\corenlp\stanford-corenlp-full-2018-10-05') #corenlp包存放路径
 
-valuewords = ["NN","NNS","NNP","NNPS"]
-words = []
-wordscount = []
-dictwords = []
-trainingtags = []
-trainingvector = []
-path = "20news-18828"
+valuewords = ["NN","NNS","NNP","NNPS"]   #有效单词类别
+words = []                               #记录候选词典
+wordscount = []                          #记录候选词典里每个单词的TF-IDF
+dictwords = []                           #保存词典
+trainingtags = []                        #训练数据的类别
+trainingvector = []                      #训练数据的VSM
+path = "20news-18828"                    #data路径
 
 def getSum(path):
 	##BEGIN
@@ -24,7 +25,7 @@ def getSum(path):
 
 def orderwords():
 	##BEGIN
-	##将词典中出现的单词频率进行排序
+	##将词典中单词按照TF-IDF降序进行排序
 	print("开始排序\n")
 	for r1 in range(0,500):
 		for r2 in range(r1+1,len(wordscount)):
@@ -36,7 +37,7 @@ def orderwords():
 
 def SaveDict():
 	##BEGIN
-	##选前500个出现频率最高的,将字典内容保存为一个txt，命名为mydict
+	##选前500个TF-IDF最高的,将字典内容保存为一个txt，命名为mydict
 	filename = 'mydict.txt' 
 	orderwords()
 	len = 0
@@ -60,24 +61,87 @@ def SaveDict():
 	print("结束保存\n")
 	##END
 
-
-def analyzefile(d):
+def haveword(d,j):
 	##BEGIN
-	##统计当前文件中的每一行，进行词频统计与记录，其中words记录单词，wordscount记录频率
-	types = []
+	##扫描文档d是否含有单词j，返回1代表含有，0代表不含有
 	try:
 		f = open(d,encoding='gb18030',errors='ignore')
 		for line in f.readlines(): 
 			types = nlp.pos_tag(line.strip())
 			for t in types:
-				if(t[1] in valuewords and t[0].isalpha() and len(t[0])>2):
-					if(t[0].lower() not in words):
-						words.append(t[0].lower())
-						wordscount.append(1)
-					else:		
-						wordscount[words.index(t[0].lower())] = wordscount[words.index(t[0].lower())] + 1
+				if(j==t[0]):
+					return 1
 				else:
 					pass
+		return 0
+	finally:
+		if f:
+			f.close()
+	##END
+
+
+def getidf(j):
+	##BEGIN
+	##计算单词j的idf并返回,总共用来构建词典的文件数为14121
+	jc = 0
+	nd = 14121
+	t = []
+	filelist = os.listdir(path)
+	for fi in filelist:
+		if(os.path.isdir(path+'\\'+fi)):
+			t.append(path+'\\'+fi)
+	for k in t:
+		count = 0
+		filesum = getSum(k)
+		everyfile = []
+		fh = os.listdir(k)
+		for m in fh:
+			if(os.path.isfile(k+'\\'+m)):
+				everyfile.append(k+'\\'+m)
+		for d in everyfile:
+			if(count < int(filesum*0.75)):
+				jc = jc + haveword(d,j)
+				count = count + 1
+			else:
+				pass
+	jc = jc + 1
+	return math.log10(nd/jc)
+
+	##END
+
+def analyzefile(d):
+	##BEGIN
+	##统计当前文件中的每一行，进行词频统计与记录，其中words记录单词，wordscount记录tf-idf
+	types = []
+	tempwords = []
+	tempwordscount = []
+	wordsum = 0
+	try:
+		f = open(d,encoding='gb18030',errors='ignore')
+		for line in f.readlines(): 
+			types = nlp.pos_tag(line.strip())
+			wordsum = wordsum + len(types)
+			for t in types:
+				if(t[1] in valuewords and t[0].isalpha() and len(t[0])>2):
+					if(t[0].lower() not in tempwords):
+						tempwords.append(t[0].lower())
+						tempwordscount.append(1)
+					else:		
+						tempwordscount[tempwords.index(t[0].lower())] = tempwordscount[tempwords.index(t[0].lower())] + 1
+				else:
+					pass
+		for i in tempwordscount:
+			i = i / wordsum               ##得到单词的TF
+		l = 0
+		for j in tempwords:
+			tempwordscount[l] = tempwordscount[l] * getidf(j)        #得到单词的TF-IDF
+			l = l + 1
+		for s in tempwords:
+			if s not in words:
+				words.append(s)
+				wordscount.append(tempwordscount[tempwords.index(s)])
+			else:
+				wordscount[words.index(s)] = ( wordscount[words.index(s)] + tempwordscount[tempwords.index(s)] ) / 2   #如果词典中已经有这个单词，则对TF-IDF取平均
 	finally:
 		if f:
 			f.close()
@@ -107,7 +171,7 @@ def buildDict():
 				count = count + 1
 			else:
 				pass
-		print("分析完毕"+k+"\n"+"总共: "+str(count)+"个文件"+"\n")		
+		print("分析完毕"+k+"\n"+"总共: "+str(int(count*0.75))+"个文件"+"\n")		
 	SaveDict()
 	print(len(words))
 	#nlp.close()
@@ -167,7 +231,7 @@ def trainingdata():
 	for k in t:
 		typenum = typenum + 1
 		count = 0;
-		print("正在training "+k+'\n')
+		print("正在建立模型，当前文件夹为："+k)
 		filesum = getSum(k)
 		everyfile = []
 		fh = os.listdir(k)
@@ -182,7 +246,7 @@ def trainingdata():
 				count = count + 1
 			else:
 				pass
-		print("training完毕"+k+"\n"+"总共: "+str(count)+"个文件"+"\n")
+		print("当前文件夹完毕"+k+"\n"+"总共: "+str(int(count*0.5))+"个文件"+"\n")
 	##END
 
 
@@ -319,11 +383,11 @@ def test_predict(j):
 	##END
 
 if __name__ == '__main__':
-	buildDict()
-	openmydict()
-	trainingdata()
-	k = getfittestk()
-	cnum = test_predict(k)
+	buildDict()                #扫描每一类前75%的文件建立词典，并将词典存到本地
+	openmydict()               #读取本地词典
+	trainingdata()             #用每一类前50%的数据构建模型
+	k = getfittestk()          #用每一类50%-75%的数据预测试，获取最优K值
+	cnum = test_predict(k)     #用每一类最后25%的数据进行测试，获得分类准确率
 	print("分类准确率为" + str(cnum))
 	nlp.close()
 
