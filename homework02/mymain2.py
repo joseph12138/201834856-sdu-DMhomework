@@ -325,7 +325,7 @@ def predicttype(d,t):
 		num.append(1)
 	for i in range(0,20):
 		for p in range(0,200):
-			num[i] = num[i] * (math.exp((-1)*(filevector[p]-avg[i][p])*(filevector[p]-avg[i][p]) / (var[i][p] * var[i][p])) ) / ((var[i][p])*sqrt(6.28))
+			num[i] = num[i] * (math.exp((-1)*(int(filevector[p])-int(avg[i][p]))*(int(filevector[p])-int(avg[i][p])) / (var[i][p] * var[i][p])) ) / ((var[i][p])*sqrt(6.28))
 	max = num[0]
 	flag = 0
 	for y in range(0,20):
@@ -364,23 +364,25 @@ def caculatevar():
 		for i in range(0,200):
 			num.append(0)
 		for r in trainingvector:
-			n = n + 1
 			if(int(trainingtags[n]) == t+1):
+				n = n + 1
 				ssum = ssum + 1
 				for k in range(0,200):
 					num[k] = num[k] + (int(trainingvector[n][k])-int(avg[t][k])) * (int(trainingvector[n][k])-int(avg[t][k])) 
+			else:
+				n = n + 1
 		for d in range(0,200):
 			num[d] = num[d] / ssum
 		avg.append(num)
 	##END
 
 if __name__ == '__main__':
-	buildDict()                #扫描每一类前75%的文件建立词典，并将词典存到本地
+	buildDict()               #扫描每一类前75%的文件建立词典，并将词典存到本地
 	openmydict()               #读取本地词典
 	trainingdata()             #用每一类前75%的数据构建模型
-	caculateavg()
-	caculatevar()
-
+	caculateavg()              #计算词典每一类文件每一属性上的均值
+	caculatevar()              #计算词典每一类文件每一属性上的方差
+	
 	cnum = test_predict()     #用每一类最后25%的数据进行测试，获得分类准确率
 	print("分类准确率为" + str(cnum))
 	nlp.close()
