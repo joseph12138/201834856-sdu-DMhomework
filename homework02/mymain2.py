@@ -30,7 +30,7 @@ def orderwords():
 	##BEGIN
 	##将词典中单词按照TF-IDF降序进行排序
 	print("开始排序\n")
-	for r1 in range(0,200):
+	for r1 in range(0,500):
 		for r2 in range(r1+1,len(wordscount)):
 			if(wordscount[r1] < wordscount[r2]):
 				wordscount[r1],wordscount[r2] = wordscount[r2],wordscount[r1]
@@ -47,7 +47,7 @@ def SaveDict():
 	print("开始保存\n")
 	with open(filename,'a',encoding='gb18030') as p:
 		for q1 in words:
-			if(len<200):
+			if(len<500):
 				p.write(q1)
 				p.write("\n")
 				len = len + 1
@@ -55,7 +55,7 @@ def SaveDict():
 				pass
 		len = 0
 		for q2 in wordscount:
-			if(len<200):
+			if(len<500):
 				p.write(str(q2))
 				p.write("\n")
 				len = len + 1
@@ -188,7 +188,7 @@ def openmydict():
 		g = open("mydict.txt",encoding='gb18030',errors='ignore')
 		p = 0
 		for k in g:
-			if(p<200):
+			if(p<500):
 				dictwords.append(k.strip('\n'))
 				p = p + 1
 			else: 
@@ -203,7 +203,7 @@ def buildfilevector(d):
 	##BEGIN
 	##将当前文件表示成向量
 	vec = []
-	for i in range(0,200):
+	for i in range(0,500):
 		vec.append(0)
 	try:
 		f = open(d,encoding='gb18030',errors='ignore')
@@ -257,7 +257,7 @@ def getdis(filevec,i):
 	##BEGIN
 	##计算向量filevec与trainingvector中下标为i的向量之间的距离
 	sum = 0
-	for h in range(0,200):
+	for h in range(0,500):
 		sum = sum + (int(filevec[h]) - int(trainingvector[i][h])) * (int(filevec[h]) - int(trainingvector[i][h]))
 	return sum
 	##END
@@ -324,7 +324,7 @@ def predicttype(d,t):
 	for i in range(0,20):
 		num.append(1)
 	for i in range(0,20):
-		for p in range(0,200):
+		for p in range(0,500):
 			num[i] = num[i] * (math.exp((-1)*(int(filevector[p])-int(avg[i][p]))*(int(filevector[p])-int(avg[i][p])) / (var[i][p] * var[i][p])) ) / ((var[i][p])*sqrt(6.28))
 	max = num[0]
 	flag = 0
@@ -344,12 +344,12 @@ def caculateavg():
 	for t in range(0,20):
 		num = []
 		n = -1
-		for i in range(0,200):
+		for i in range(0,500):
 			num.append(0)
 		for r in trainingvector:
 			n = n + 1
 			if(int(trainingtags[n]) == t+1):
-				for k in range(0,200):
+				for k in range(0,500):
 					num[k] = (num[k] + int(trainingvector[n][k])) / 2
 		avg.append(num)
 	##END
@@ -361,17 +361,17 @@ def caculatevar():
 		num = []
 		n = -1
 		ssum = 0
-		for i in range(0,200):
+		for i in range(0,500):
 			num.append(0)
 		for r in trainingvector:
 			if(int(trainingtags[n]) == t+1):
 				n = n + 1
 				ssum = ssum + 1
-				for k in range(0,200):
+				for k in range(0,500):
 					num[k] = num[k] + (int(trainingvector[n][k])-int(avg[t][k])) * (int(trainingvector[n][k])-int(avg[t][k])) 
 			else:
 				n = n + 1
-		for d in range(0,200):
+		for d in range(0,500):
 			num[d] = num[d] / ssum
 		avg.append(num)
 	##END
