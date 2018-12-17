@@ -1,0 +1,34 @@
+201834856-sdu-DMhomework03
+
+一、程序设计思想 
+
+  （一）分词工具  
+      程序采用sk-learn作为分词工具。 
+      
+  （二）数据集的建立  
+      对于每一类文件集，将前75%的数据作为训练数据，后25%的数据作为真实的测试  
+      数据。    
+      
+  （三）VSM表示   
+      利用训练数据进行向量模型的建立   
+      
+  （四）NBC算法实现    
+      对测试数据进行NBC分类实现  
+      
+      
+二、算法实现    
+
+  （一）Main函数展示    
+        if __name__ == '__main__':   
+	          openfile()                             ##打开词典文件，将文本保存为text，将类别保存到tags   
+	          kmeans(text,tags)                         
+	          affinity_propagation(text,tags)   
+	          mean_shift(text,tags)   
+	          spectral_clustering(text,tags)   
+	          agglomerative_clustering(text,tags)   
+	          dbscan(text,tags)   
+	          gaussian_mixtures(text,tags)   
+		
+    
+         
+
