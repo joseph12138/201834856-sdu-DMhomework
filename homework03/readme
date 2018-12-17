@@ -10,21 +10,21 @@
       数据。    
       
   （三）NBC算法实现    
-      对测试数据进行sklearn中各类cluster算法实现  
+      对测试数据进行sklearn中各类cluster算法实现并输出准确率  
       
       
 二、算法实现    
 
   （一）Main函数展示    
         if __name__ == '__main__':   
-	          openfile()                             ##打开词典文件，将文本保存为text，将类别保存到tags   
-	          kmeans(text,tags)                         
-	          affinity_propagation(text,tags)   
-	          mean_shift(text,tags)   
-	          spectral_clustering(text,tags)   
-	          agglomerative_clustering(text,tags)   
-	          dbscan(text,tags)   
-	          gaussian_mixtures(text,tags)   
+	      openfile()                             ##打开词典文件，将文本保存为text，将类别保存到tags   
+	      kmeans(text,tags)                         
+	      affinity_propagation(text,tags)   
+	      mean_shift(text,tags)   
+	      spectral_clustering(text,tags)   
+	      agglomerative_clustering(text,tags)   
+	      dbscan(text,tags)   
+	      gaussian_mixtures(text,tags)   
 		
     
          
